@@ -58,7 +58,7 @@ def main(
     with h5py.File(features_file, 'r') as features_f,  h5py.File(matches_file, 'r') as matches_f,  open(sfm_filtered, 'w', encoding='utf-8') as filterd_f:
         test_loader = DataLoader(
             dataset=HlocDoppelgangersDataset(
-                img_size=640,
+                img_size=1024,
                 image_dir=image_dir,
                 pair_path=pair_path,
                 features_file=features_f,
