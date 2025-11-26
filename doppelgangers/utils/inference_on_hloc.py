@@ -71,7 +71,7 @@ def main(
             with torch.no_grad():
                 scores = model(b['image'].cuda()).detach().cpu().numpy()
                 for i1, i2, score in zip(b['image1_name'], b['image2_name'], scores):
-                    good_pair_prob = softmax(score)
+                    good_pair_prob = softmax(score[1])
                     filterd_f.write(f"{i1} {i2} {good_pair_prob}\n")
 
 
