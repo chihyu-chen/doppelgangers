@@ -1,15 +1,16 @@
-from email.mime import image
 from types import SimpleNamespace
 
 from tqdm import tqdm
 from ..models.cnn_classifier import decoder
 from ..datasets.hloc_dataset import HlocDoppelgangersDataset
 import torch
-import numpy as np
 from torch.utils.data import DataLoader
 import copy
 import h5py
 import argparse
+from scipy.special import softmax
+
+
 
 def get_args():
     # command line args
@@ -34,7 +35,6 @@ def get_args():
     args = parser.parse_args()
     return args
 
-
 def main(
     weights_path,
     features_file,
@@ -55,14 +55,7 @@ def main(
     model.load_state_dict(new_ckpt, strict=True)
     model = model.cuda().eval()
 
-    # weights_path = '/files/weights/doppelgangers_classifier_loftr.pt'
-    # features_file='/outputs/features.h5'
-    # matches_file='/outputs/matches.h5'
-    # sfm_filtered='/outputs/pairs-sfm-filtered.txt'
-    # image_dir='/images',
-    # pair_path='/pairs-sfm.txt',
-
-    with h5py.File(features_file, 'r') as features_f,  h5py.File(matches_file, 'r') as matches_f,  open(sfm_filtered, 'w') as filterd_f:
+    with h5py.File(features_file, 'r') as features_f,  h5py.File(matches_file, 'r') as matches_f,  open(sfm_filtered, 'w', encoding='utf-8') as filterd_f:
         test_loader = DataLoader(
             dataset=HlocDoppelgangersDataset(
                 img_size=640,
@@ -78,8 +71,9 @@ def main(
             with torch.no_grad():
                 scores = model(b['image'].cuda()).detach().cpu().numpy()
                 for i1, i2, score in zip(b['image1_name'], b['image2_name'], scores):
-                    score_argmax = np.argmax(score)
-                    filterd_f.write(f"{i1} {i2} {score_argmax}\n")
+                    good_pair_prob = softmax(score)
+                    filterd_f.write(f"{i1} {i2} {good_pair_prob}\n")
+
 
 
 if __name__ == "__main__":
@@ -101,5 +95,5 @@ if __name__ == "__main__":
         image_dir=image_dir,
         pair_path=pair_path,
         batch_size=batch_size,
+        threshold=0.8
     )
-

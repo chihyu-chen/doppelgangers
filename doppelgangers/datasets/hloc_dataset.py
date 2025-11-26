@@ -1,10 +1,11 @@
 import os.path as osp
 import numpy as np
 import torch
-import torch.nn.functional as F
 from torch.utils.data import Dataset
 import cv2
 from ..utils.dataset import read_loftr_matches
+
+
 
 class HlocDoppelgangersDataset(Dataset):
     def __init__(self,
@@ -99,4 +100,3 @@ def get_data_loaders(cfg):
         "test_loader": test_loader,
     }
     return loaders
-
