@@ -47,7 +47,7 @@ class HlocDoppelgangersDataset(Dataset):
         keypoints1 = np.array(matches_data['keypoints0'])
         keypoints2 = np.array(matches_data['keypoints1'])
         matches = np.array(matches_data['matches0'])
-        actual_matches = [matches > -1]
+        actual_matches = matches > -1
         matches = matches[actual_matches]
         conf = np.array(matches_data['matching_scores0'])
         conf = conf[actual_matches]
