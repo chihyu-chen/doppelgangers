@@ -11,7 +11,6 @@ class HlocDoppelgangersDataset(Dataset):
     def __init__(self,
                  image_dir,
                  matches_file,
-                 features_file,
                  pair_path,
                  img_size,
                  **kwargs):
@@ -28,7 +27,6 @@ class HlocDoppelgangersDataset(Dataset):
         super().__init__()
         self.image_dir = image_dir    
         self.matches_f = matches_file
-        self.features_f = features_file
         self.pairs_info = []
         for i1 in matches_file.keys():
             for i2 in matches_file[i1].keys():
@@ -78,7 +76,6 @@ def get_datasets(cfg):
     te_dataset = HlocDoppelgangersDataset(
                     cfg.image_dir,
                     cfg.matches_file,
-                    cfg.features_file,
                     cfg.test.pair_path,
                     img_size=getattr(cfg.test, "img_size", 640))
 

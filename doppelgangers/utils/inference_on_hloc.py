@@ -37,7 +37,6 @@ def get_args():
 
 def main(
     weights_path,
-    features_file,
     matches_file,
     sfm_filtered,
     image_dir,
@@ -55,13 +54,12 @@ def main(
     model.load_state_dict(new_ckpt, strict=True)
     model = model.cuda().eval()
 
-    with h5py.File(features_file, 'r') as features_f,  h5py.File(matches_file, 'r') as matches_f,  open(sfm_filtered, 'w', encoding='utf-8') as filterd_f:
+    with h5py.File(matches_file, 'r') as matches_f,  open(sfm_filtered, 'w', encoding='utf-8') as filterd_f:
         test_loader = DataLoader(
             dataset=HlocDoppelgangersDataset(
                 img_size=640,
                 image_dir=image_dir,
                 pair_path=pair_path,
-                features_file=features_f,
                 matches_file=matches_f
             ),
             batch_size=batch_size,
@@ -89,11 +87,9 @@ if __name__ == "__main__":
 
     main(
         weights_path=weights_path,
-        features_file=features_file,
         matches_file=matches_file,
         sfm_filtered=sfm_filtered,
         image_dir=image_dir,
         pair_path=pair_path,
-        batch_size=batch_size,
-        threshold=0.8
+        batch_size=batch_size
     )
