@@ -48,8 +48,8 @@ class HlocDoppelgangersDataset(Dataset):
         keypoints1 = np.array(features1['keypoints'])
         keypoints2 = np.array(features2['keypoints'])
         matches_data = self.matches_f[image_1_name][image_2_name]
-        matches = np.array(matches_data['matches'])
-        conf = np.array(matches_data['scores'])
+        matches = np.array(matches_data['matches0'])
+        conf = np.array(matches_data['matching_scores0'])
         keypoints1 = keypoints1[matches[..., 0]].astype(np.int32)
         keypoints2 = keypoints2[matches[..., 1]].astype(np.int32)
 
