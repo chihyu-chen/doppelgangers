@@ -43,15 +43,16 @@ class HlocDoppelgangersDataset(Dataset):
     def __getitem__(self, idx):
         image_1_name, image_2_name = self.pairs_info[idx]
         
-        features1 = self.features_f[image_1_name]
-        features2 = self.features_f[image_2_name]
-        keypoints1 = np.array(features1['keypoints'])
-        keypoints2 = np.array(features2['keypoints'])
         matches_data = self.matches_f[image_1_name][image_2_name]
+        keypoints1 = np.array(matches_data['keypoints0'])
+        keypoints2 = np.array(matches_data['keypoints1'])
         matches = np.array(matches_data['matches0'])
+        actual_matches = [matches > -1]
+        matches = matches[actual_matches]
         conf = np.array(matches_data['matching_scores0'])
-        keypoints1 = keypoints1[matches[..., 0]].astype(np.int32)
-        keypoints2 = keypoints2[matches[..., 1]].astype(np.int32)
+        conf = conf[actual_matches]
+        keypoints1 = keypoints1[matches].astype(np.int32)
+        keypoints2 = keypoints2[matches].astype(np.int32)
 
         if np.sum(conf>0.8) == 0:
             matches = None
