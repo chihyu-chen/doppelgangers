@@ -10,6 +10,7 @@ from ..utils.dataset import read_loftr_matches
 class HlocDoppelgangersDataset(Dataset):
     def __init__(self,
                  image_dir,
+                 features_file,
                  matches_file,
                  pair_path,
                  img_size,
@@ -26,6 +27,7 @@ class HlocDoppelgangersDataset(Dataset):
         """
         super().__init__()
         self.image_dir = image_dir    
+        self.features_f = features_file
         self.matches_f = matches_file
         self.pairs_info = []
         for i1 in matches_file.keys():
@@ -41,16 +43,21 @@ class HlocDoppelgangersDataset(Dataset):
     def __getitem__(self, idx):
         image_1_name, image_2_name = self.pairs_info[idx]
         
+        keypoints1_f = np.asarray(self.features_f[image_1_name]['keypoints'])
+        keypoints2_f = np.asarray(self.features_f[image_2_name]['keypoints'])
+        print(f"idx {idx}: keypoints1 shape from features: {keypoints1_f.shape}, keypoints2 shape from features: {keypoints2_f.shape}")
         matches_data = self.matches_f[image_1_name][image_2_name]
-        keypoints1 = np.array(matches_data['keypoints0'])
-        keypoints2 = np.array(matches_data['keypoints1'])
+        keypoints1_m = np.array(matches_data['keypoints0'])
+        keypoints2_m = np.array(matches_data['keypoints1'])
+        print(f"idx {idx}: keypoints1 shape from matches: {keypoints1_m.shape}, keypoints2 shape from matches: {keypoints2_m.shape}")
         matches = np.array(matches_data['matches0'])
         actual_matches = matches > -1
         matches = matches[actual_matches]
+        print(f"idx {idx}: max of matches: {matches.max()}")
         conf = np.array(matches_data['matching_scores0'])
         conf = conf[actual_matches]
-        keypoints1 = keypoints1[matches].astype(np.int32)
-        keypoints2 = keypoints2[matches].astype(np.int32)
+        keypoints1 = keypoints1_f[matches].astype(np.int32)
+        keypoints2 = keypoints2_f[matches].astype(np.int32)
 
         if np.sum(conf>0.8) == 0:
             matches = None
@@ -75,6 +82,7 @@ class HlocDoppelgangersDataset(Dataset):
 def get_datasets(cfg):
     te_dataset = HlocDoppelgangersDataset(
                     cfg.image_dir,
+                    cfg.features_file,
                     cfg.matches_file,
                     cfg.test.pair_path,
                     img_size=getattr(cfg.test, "img_size", 640))
