@@ -48,14 +48,14 @@ class HlocDoppelgangersDataset(Dataset):
         matches_data = self.matches_f[image_1_name][image_2_name]
         keypoints1_m = np.array(matches_data['keypoints0'])
         keypoints2_m = np.array(matches_data['keypoints1'])
-        matches = np.array(matches_data['matches0'])
+        matches = np.array(matches_data['matches_doppel'])
         actual_matches = matches > -1
         matches = matches[actual_matches]
-        assert matches.max() < keypoints1_f.shape[0] and matches.max() < keypoints2_f.shape[0], f"{image_1_name}, {image_2_name}: {matches.max()}, {keypoints1_f.shape[0]}, {keypoints2_f.shape[0]}"
-        conf = np.array(matches_data['matching_scores0'])
+        assert matches.max() < keypoints1_m.shape[0] and matches.max() < keypoints2_m.shape[0], f"{image_1_name}, {image_2_name}: {matches.max()}, {keypoints1_m.shape[0]}, {keypoints2_m.shape[0]}"
+        conf = np.array(matches_data['matching_scores_doppel'])
         conf = conf[actual_matches]
-        keypoints1 = keypoints1_f[matches].astype(np.int32)
-        keypoints2 = keypoints2_f[matches].astype(np.int32)
+        keypoints1 = keypoints1_m[matches].astype(np.int32)
+        keypoints2 = keypoints2_m[matches].astype(np.int32)
 
         if np.sum(conf>0.8) == 0:
             matches = None
