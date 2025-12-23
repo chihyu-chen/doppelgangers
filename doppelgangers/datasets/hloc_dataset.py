@@ -51,7 +51,7 @@ class HlocDoppelgangersDataset(Dataset):
         matches = np.array(matches_data['matches0'])
         actual_matches = matches > -1
         matches = matches[actual_matches]
-        print(f"idx {idx}: max of matches: {matches.max()}\n\tidx {idx}: kpt1 shape from features: {keypoints1_f.shape}, kpt2 shape from features: {keypoints2_f.shape}\n\tidx {idx}: kpt1 shape from matches: {keypoints1_m.shape}, kpt2 shape from matches: {keypoints2_m.shape}")
+        assert matches.max() < keypoints1_f.shape[0] and matches.max() < keypoints2_f.shape[0], f"{idx}: {matches.max()}, {keypoints1_f.shape[0]}, {keypoints2_f.shape[0]}"
         conf = np.array(matches_data['matching_scores0'])
         conf = conf[actual_matches]
         keypoints1 = keypoints1_f[matches].astype(np.int32)
