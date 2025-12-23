@@ -45,15 +45,13 @@ class HlocDoppelgangersDataset(Dataset):
         
         keypoints1_f = np.asarray(self.features_f[image_1_name]['keypoints'])
         keypoints2_f = np.asarray(self.features_f[image_2_name]['keypoints'])
-        print(f"idx {idx}: keypoints1 shape from features: {keypoints1_f.shape}, keypoints2 shape from features: {keypoints2_f.shape}")
         matches_data = self.matches_f[image_1_name][image_2_name]
         keypoints1_m = np.array(matches_data['keypoints0'])
         keypoints2_m = np.array(matches_data['keypoints1'])
-        print(f"idx {idx}: keypoints1 shape from matches: {keypoints1_m.shape}, keypoints2 shape from matches: {keypoints2_m.shape}")
         matches = np.array(matches_data['matches0'])
         actual_matches = matches > -1
         matches = matches[actual_matches]
-        print(f"idx {idx}: max of matches: {matches.max()}")
+        print(f"idx {idx}: max of matches: {matches.max()}\n\tidx {idx}: kpt1 shape from features: {keypoints1_f.shape}, kpt2 shape from features: {keypoints2_f.shape}\n\tidx {idx}: kpt1 shape from matches: {keypoints1_m.shape}, kpt2 shape from matches: {keypoints2_m.shape}")
         conf = np.array(matches_data['matching_scores0'])
         conf = conf[actual_matches]
         keypoints1 = keypoints1_f[matches].astype(np.int32)
