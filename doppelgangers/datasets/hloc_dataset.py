@@ -47,16 +47,18 @@ class HlocDoppelgangersDataset(Dataset):
         keypoints1 = np.asarray(matches_data['keypoints0']).astype(np.int32)
         keypoints2 = np.asarray(matches_data['keypoints1']).astype(np.int32)
         conf = np.asarray(matches_data['matching_scores_doppel'])
+        high_conf = conf > 0.8
 
-        if np.sum(conf>0.8) == 0:
+        assert keypoints1.shape[0] == keypoints2.shape[0] == conf.shape[0], f"Mismatch in number of keypoints and confidence scores: {keypoints1.shape[0]}, {keypoints2.shape[0]}, {conf.shape[0]}"
+
+        if high_conf.sum() == 0:
             matches = None
         else:
-            F, mask = cv2.findFundamentalMat(keypoints1[conf>0.8],keypoints2[conf>0.8],cv2.FM_RANSAC, 3, 0.99)
+            F, mask = cv2.findFundamentalMat(keypoints1[high_conf],keypoints2[high_conf],cv2.FM_RANSAC, 3, 0.99)
             if mask is None or F is None:
                 matches = None
             else:
-                matches = np.array(np.ones((keypoints1.shape[0], 2)) * np.arange(keypoints1.shape[0]).reshape(-1,1)).astype(int)[conf>0.8][mask.ravel()==1]
-
+                matches = np.array(np.ones((keypoints1.shape[0], 2)) * np.arange(keypoints1.shape[0]).reshape(-1,1)).astype(int)[high_conf][mask.ravel()==1]
         img_name1 = osp.join(self.image_dir, image_1_name)
         img_name2 = osp.join(self.image_dir, image_2_name)
 
