@@ -44,21 +44,21 @@ class HlocDoppelgangersDataset(Dataset):
         image_1_name, image_2_name = self.pairs_info[idx]
         matches_data = self.matches_f[image_1_name][image_2_name]
 
-        # option1: load raw keypoints from LoFTR in loftr_matches.h5
-        keypoints1 = np.asarray(matches_data['keypoints0']).astype(np.int32)
-        keypoints2 = np.asarray(matches_data['keypoints1']).astype(np.int32)
-        conf = np.asarray(matches_data['scores'])
-        assert keypoints1.shape[0] == keypoints2.shape[0] == conf.shape[0], f"Mismatch in number of keypoints and confidence scores: {keypoints1.shape[0]}, {keypoints2.shape[0]}, {conf.shape[0]}"
-
-        # # option2: load keypoints from filtered features in loftr_features.h5
-        # keypoints1 = np.asarray(self.features_f[image_1_name]['keypoints'])
-        # keypoints2 = np.asarray(self.features_f[image_2_name]['keypoints'])
-        # matches0 = np.asarray(matches_data['matches0'])
-        # conf = np.asarray(matches_data['matching_scores0'])
-        # mask = matches0 > -1
-        # keypoints1 = keypoints1[mask].astype(np.int32)
-        # keypoints2 = keypoints2[matches0][mask].astype(np.int32)
+        # # option1: load raw keypoints from LoFTR in loftr_matches.h5
+        # keypoints1 = np.asarray(matches_data['keypoints0']).astype(np.int32)
+        # keypoints2 = np.asarray(matches_data['keypoints1']).astype(np.int32)
+        # conf = np.asarray(matches_data['scores'])
         # assert keypoints1.shape[0] == keypoints2.shape[0] == conf.shape[0], f"Mismatch in number of keypoints and confidence scores: {keypoints1.shape[0]}, {keypoints2.shape[0]}, {conf.shape[0]}"
+
+        # option2: load keypoints from filtered features in loftr_features.h5
+        keypoints1 = np.asarray(self.features_f[image_1_name]['keypoints'])
+        keypoints2 = np.asarray(self.features_f[image_2_name]['keypoints'])
+        matches0 = np.asarray(matches_data['matches0'])
+        conf = np.asarray(matches_data['matching_scores0'])
+        mask = matches0 > -1
+        keypoints1 = keypoints1[mask].astype(np.int32)
+        keypoints2 = keypoints2[matches0][mask].astype(np.int32)
+        assert keypoints1.shape[0] == keypoints2.shape[0] == conf.shape[0], f"Mismatch in number of keypoints and confidence scores: {keypoints1.shape[0]}, {keypoints2.shape[0]}, {conf.shape[0]}"
 
         high_conf = conf > 0.8
         if high_conf.sum() == 0:
