@@ -43,19 +43,10 @@ class HlocDoppelgangersDataset(Dataset):
     def __getitem__(self, idx):
         image_1_name, image_2_name = self.pairs_info[idx]
         
-        keypoints1_f = np.asarray(self.features_f[image_1_name]['keypoints'])
-        keypoints2_f = np.asarray(self.features_f[image_2_name]['keypoints'])
         matches_data = self.matches_f[image_1_name][image_2_name]
-        keypoints1_m = np.array(matches_data['keypoints0'])
-        keypoints2_m = np.array(matches_data['keypoints1'])
-        matches = np.array(matches_data['matches_doppel'])
-        actual_matches = matches > -1
-        matches = matches[actual_matches]
-        assert matches.max() < keypoints1_m.shape[0] and matches.max() < keypoints2_m.shape[0], f"{image_1_name}, {image_2_name}: {matches.max()}, {keypoints1_m.shape[0]}, {keypoints2_m.shape[0]}"
-        conf = np.array(matches_data['matching_scores_doppel'])
-        conf = conf[actual_matches]
-        keypoints1 = keypoints1_m[matches].astype(np.int32)
-        keypoints2 = keypoints2_m[matches].astype(np.int32)
+        keypoints1 = np.asarray(matches_data['keypoints0']).astype(np.int32)
+        keypoints2 = np.asarray(matches_data['keypoints1']).astype(np.int32)
+        conf = np.asarray(matches_data['matching_scores_doppel'])
 
         if np.sum(conf>0.8) == 0:
             matches = None
