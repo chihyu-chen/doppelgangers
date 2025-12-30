@@ -19,49 +19,40 @@ def get_args():
     # colmap setting
     parser.add_argument('--weights_path', type=str,
                         help="Path to classifier weights")
-    parser.add_argument('--features_path', type=str,
-                        help="path to hloc features HDF5 file")
     parser.add_argument('--matches_path', type=str,
                         help="path to hloc matches HDF5 file")
     parser.add_argument('--filtered_path', type=str,
                         help="path to hloc matches HDF5 file")
     parser.add_argument('--image_dir', type=str,
                         help="path to where images are stored")
-    parser.add_argument('--pairs_path', type=str,
-                        help="pairs_path path to sfm-pairs.txt")
     parser.add_argument('--batch_size', type=int, default=16,
                         help="batch size")
 
-    args = parser.parse_args()
-    return args
+    return parser.parse_args()
 
 def main(
     weights_path,
-    features_file,
     matches_file,
     sfm_filtered,
     image_dir,
-    pair_path,
     batch_size,
 ):
     model = decoder(cfg=SimpleNamespace(input_dim=10))
     ckpt = torch.load(weights_path)
     new_ckpt = copy.deepcopy(ckpt['dec'])
 
-    for key, value in ckpt['dec'].items():
+    for key, _ in ckpt['dec'].items():
         if 'module.' in key:
             new_ckpt[key[len('module.'):]] = new_ckpt.pop(key)
 
     model.load_state_dict(new_ckpt, strict=True)
     model = model.cuda().eval()
 
-    with h5py.File(features_file, 'r') as features_f,  h5py.File(matches_file, 'r') as matches_f,  open(sfm_filtered, 'w', encoding='utf-8') as filterd_f:
+    with h5py.File(matches_file, 'r') as matches_f,  open(sfm_filtered, 'w', encoding='utf-8') as filterd_f:
         test_loader = DataLoader(
             dataset=HlocDoppelgangersDataset(
                 img_size=640,
                 image_dir=image_dir,
-                pair_path=pair_path,
-                features_file=features_f,
                 matches_file=matches_f
             ),
             batch_size=batch_size,
@@ -79,20 +70,10 @@ def main(
 if __name__ == "__main__":
     args = get_args()
 
-    weights_path = args.weights_path
-    features_file = args.features_path
-    matches_file = args.matches_path
-    sfm_filtered = args.filtered_path
-    image_dir = args.image_dir
-    pair_path = args.pairs_path
-    batch_size = args.batch_size
-
     main(
-        weights_path=weights_path,
-        features_file=features_file,
-        matches_file=matches_file,
-        sfm_filtered=sfm_filtered,
-        image_dir=image_dir,
-        pair_path=pair_path,
-        batch_size=batch_size
+    weights_path=args.weights_path,
+    matches_file=args.matches_path,
+    sfm_filtered=args.filtered_path,
+    image_dir=args.image_dir,
+    batch_size=args.batch_size,
     )

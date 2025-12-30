@@ -10,11 +10,8 @@ from ..utils.dataset import read_loftr_matches
 class HlocDoppelgangersDataset(Dataset):
     def __init__(self,
                  image_dir,
-                 features_file,
                  matches_file,
-                 pair_path,
-                 img_size,
-                 **kwargs):
+                 img_size):
         """
         Doppelgangers test dataset: loading images and loftr matches for Doppelgangers model.
         
@@ -27,7 +24,6 @@ class HlocDoppelgangersDataset(Dataset):
         """
         super().__init__()
         self.image_dir = image_dir    
-        self.features_f = features_file
         self.matches_f = matches_file
         self.pairs_info = []
         for i1 in matches_file.keys():
@@ -44,20 +40,9 @@ class HlocDoppelgangersDataset(Dataset):
         image_1_name, image_2_name = self.pairs_info[idx]
         matches_data = self.matches_f[image_1_name][image_2_name]
 
-        # # option1: load raw keypoints from LoFTR in loftr_matches.h5
-        # keypoints1 = np.asarray(matches_data['keypoints0']).astype(np.int32)
-        # keypoints2 = np.asarray(matches_data['keypoints1']).astype(np.int32)
-        # conf = np.asarray(matches_data['scores'])
-        # assert keypoints1.shape[0] == keypoints2.shape[0] == conf.shape[0], f"Mismatch in number of keypoints and confidence scores: {keypoints1.shape[0]}, {keypoints2.shape[0]}, {conf.shape[0]}"
-
-        # option2: load keypoints from filtered features in loftr_features.h5
-        keypoints1 = np.asarray(self.features_f[image_1_name]['keypoints'])
-        keypoints2 = np.asarray(self.features_f[image_2_name]['keypoints'])
-        matches0 = np.asarray(matches_data['matches0'])
-        conf = np.asarray(matches_data['matching_scores0'])
-        mask = matches0 > -1
-        keypoints1 = keypoints1[mask].astype(np.int32)
-        keypoints2 = keypoints2[matches0][mask].astype(np.int32)
+        keypoints1 = np.asarray(matches_data['keypoints0']).astype(np.int32)
+        keypoints2 = np.asarray(matches_data['keypoints1']).astype(np.int32)
+        conf = np.asarray(matches_data['scores'])
         assert keypoints1.shape[0] == keypoints2.shape[0] == conf.shape[0], f"Mismatch in number of keypoints and confidence scores: {keypoints1.shape[0]}, {keypoints2.shape[0]}, {conf.shape[0]}"
 
         high_conf = conf > 0.8
@@ -83,10 +68,9 @@ class HlocDoppelgangersDataset(Dataset):
 def get_datasets(cfg):
     te_dataset = HlocDoppelgangersDataset(
                     cfg.image_dir,
-                    cfg.features_file,
                     cfg.matches_file,
-                    cfg.test.pair_path,
-                    img_size=getattr(cfg.test, "img_size", 640))
+                    img_size=getattr(cfg.test, "img_size", 640)
+                    )
 
     return te_dataset
 
